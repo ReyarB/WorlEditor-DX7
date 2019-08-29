@@ -1,0 +1,21 @@
+Línea 75: la clase GSZAOWorldEditor.lvButtons_H del control cOptimizar no era una clase de control cargada.
+Línea 101: la clase GSZAOWorldEditor.lvButtons_H del control cCancelar no era una clase de control cargada.
+Línea 76: el nombre de la propiedad Default de cOptimizar no es válido.
+Línea 82: el nombre de la propiedad _ExtentX de cOptimizar no es válido.
+Línea 83: el nombre de la propiedad _ExtentY de cOptimizar no es válido.
+Línea 84: el nombre de la propiedad Caption de cOptimizar no es válido.
+Línea 85: el nombre de la propiedad CapAlign de cOptimizar no es válido.
+Línea 86: el nombre de la propiedad BackStyle de cOptimizar no es válido.
+Línea 96: el nombre de la propiedad cGradient de cOptimizar no es válido.
+Línea 97: el nombre de la propiedad Mode de cOptimizar no es válido.
+Línea 98: el nombre de la propiedad Value de cOptimizar no es válido.
+Línea 99: el nombre de la propiedad cBack de cOptimizar no es válido.
+Línea 107: el nombre de la propiedad _ExtentX de cCancelar no es válido.
+Línea 108: el nombre de la propiedad _ExtentY de cCancelar no es válido.
+Línea 109: el nombre de la propiedad Caption de cCancelar no es válido.
+Línea 110: el nombre de la propiedad CapAlign de cCancelar no es válido.
+Línea 111: el nombre de la propiedad BackStyle de cCancelar no es válido.
+Línea 121: el nombre de la propiedad cGradient de cCancelar no es válido.
+Línea 122: el nombre de la propiedad Mode de cCancelar no es válido.
+Línea 123: el nombre de la propiedad Value de cCancelar no es válido.
+Línea 124: el nombre de la propiedad cBack de cCancelar no es válido.
