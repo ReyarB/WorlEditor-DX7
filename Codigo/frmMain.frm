@@ -5,16 +5,16 @@ Begin VB.Form frmMain
    BackColor       =   &H00000000&
    BorderStyle     =   1  'Fixed Single
    Caption         =   "WorldEditor ReyarB"
-   ClientHeight    =   10740
+   ClientHeight    =   13035
    ClientLeft      =   390
    ClientTop       =   840
-   ClientWidth     =   15270
+   ClientWidth     =   20940
    Icon            =   "frmMain.frx":0000
    KeyPreview      =   -1  'True
    LinkTopic       =   "Form1"
-   ScaleHeight     =   716
+   ScaleHeight     =   869
    ScaleMode       =   3  'Pixel
-   ScaleWidth      =   1018
+   ScaleWidth      =   1396
    WindowState     =   2  'Maximized
    Begin VB.PictureBox COPIAR_GRH 
       Appearance      =   0  'Flat
@@ -2028,7 +2028,7 @@ Begin VB.Form frmMain
          Strikethrough   =   0   'False
       EndProperty
       ForeColor       =   &H00FFFFFF&
-      Height          =   4275
+      Height          =   6555
       Left            =   120
       Locked          =   -1  'True
       MultiLine       =   -1  'True
@@ -2576,10 +2576,10 @@ Begin VB.Form frmMain
       BackColor       =   &H000000FF&
       BorderColor     =   &H00C0C0C0&
       FillColor       =   &H00C0E0FF&
-      Height          =   9165
+      Height          =   9405
       Left            =   4560
       Top             =   1440
-      Width           =   10605
+      Width           =   16125
    End
    Begin VB.Menu FileMnu 
       Caption         =   "&Archivo"
@@ -3718,12 +3718,11 @@ If HotKeysAllow = False Then
                 End If
             End If
             If SupData(ReadField(2, lListado(Index).Text, Asc("#"))).Block = True Then
-            'Reyarb cambie <> 0 por =0
                 If LenB(cInsertarBloqueo.Tag) = 0 Then cInsertarBloqueo.Tag = IIf(cInsertarBloqueo.value = True, 1, 0)
                 cInsertarBloqueo.value = True
                 Call cInsertarBloqueo_Click
             Else
-                If LenB(cInsertarBloqueo.Tag) = 0 Then
+                If LenB(cInsertarBloqueo.Tag) <> 0 Then
                     cInsertarBloqueo.value = IIf(Val(cInsertarBloqueo.Tag) = 1, True, False)
                     cInsertarBloqueo.Tag = vbNullString
                     Call cInsertarBloqueo_Click
@@ -4090,9 +4089,9 @@ Private Sub mnuGuardarcomoBMP_Click()
 'Last modified: 01/05/2008 - ^[GS]^
 '*************************************************
     Dim Ratio As Integer
-    Ratio = CInt(Val(InputBox("En que escala queres Renderizar? Entre 1 y 20.", "Elegi Escala", "1")))
-    If Ratio < 1 Then Ratio = 1
-    If Ratio >= 1 And Ratio <= 20 Then
+    Ratio = CInt(Val(InputBox("En que escala queres Renderizar? Entre 1 y 31.", "Elegi Escala", "31")))
+    If Ratio < 1 Then Ratio = 31
+    If Ratio >= 1 And Ratio <= 31 Then
         RenderToPicture Ratio, True
     End If
 End Sub
@@ -4103,9 +4102,9 @@ Private Sub mnuGuardarcomoJPG_Click()
 'Last modified: 01/05/2008 - ^[GS]^
 '*************************************************
     Dim Ratio As Integer
-    Ratio = CInt(Val(InputBox("En que escala queres Renderizar? Entre 1 y 20.", "Elegi Escala", "1")))
-    If Ratio < 1 Then Ratio = 1
-    If Ratio >= 1 And Ratio <= 20 Then
+    Ratio = CInt(Val(InputBox("En que escala queres Renderizar? Entre 1 y 31.", "Elegi Escala", "31")))
+    If Ratio < 1 Then Ratio = 31
+    If Ratio >= 1 And Ratio <= 31 Then
         RenderToPicture Ratio, False
     End If
 End Sub
@@ -4801,6 +4800,9 @@ For i = 0 To 6
         Call VerFuncion(i, False)
     End If
 Next
+        If MapInfo.Changed = 1 Then ' Solo guardo si el mapa esta modificado
+            modMapIO.GuardarMapa Dialog.FileName
+        End If
 If mnuAutoQuitarFunciones.Checked = True Then Call mnuQuitarFunciones_Click
 Call VerFuncion(Index, SelectPanel(Index).value)
 End Sub

@@ -347,8 +347,8 @@ frmMain.cVerBloqueos.value = frmMain.mnuVerBloqueos.Checked
 ' Tamaño de visualizacion
 PantallaX = Val(Leer.GetValue("MOSTRAR", "PantallaX"))
 PantallaY = Val(Leer.GetValue("MOSTRAR", "PantallaY"))
-If PantallaX > 23 Or PantallaX <= 2 Then PantallaX = 23
-If PantallaY > 32 Or PantallaY <= 2 Then PantallaY = 32
+If PantallaX > 28 Or PantallaX <= 2 Then PantallaX = 21
+If PantallaY > 50 Or PantallaY <= 2 Then PantallaY = 19
 
 ' [GS] 02/10/06
 ' Tamaño de visualizacion en el cliente

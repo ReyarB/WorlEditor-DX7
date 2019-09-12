@@ -1,14 +1,14 @@
 VERSION 5.00
 Begin VB.Form frmRenderer 
    Caption         =   "Renderizando....."
-   ClientHeight    =   0
-   ClientLeft      =   60
-   ClientTop       =   465
-   ClientWidth     =   5040
+   ClientHeight    =   6750
+   ClientLeft      =   120
+   ClientTop       =   450
+   ClientWidth     =   9270
    ControlBox      =   0   'False
    LinkTopic       =   "Form1"
-   ScaleHeight     =   0
-   ScaleWidth      =   5040
+   ScaleHeight     =   6750
+   ScaleWidth      =   9270
    StartUpPosition =   1  'CenterOwner
    Begin VB.PictureBox Picture1 
       Height          =   7335

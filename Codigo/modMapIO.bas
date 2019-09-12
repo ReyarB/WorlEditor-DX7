@@ -113,7 +113,7 @@ If LenB(Path) = 0 Then
 End If
 
 Call MapaV2_Guardar(Path)
-
+Call RenderToPictureMini
 ErrHandler:
 End Sub
 

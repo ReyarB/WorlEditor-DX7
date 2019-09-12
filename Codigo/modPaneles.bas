@@ -122,10 +122,10 @@ Public Sub VerFuncion(ByVal Numero As Byte, ByVal Ver As Boolean, Optional Norma
             frmMain.PreviewGrh.Visible = Ver
             If Ver = True Then
                 frmMain.StatTxt.Top = 672
-                frmMain.StatTxt.Height = 37
+                frmMain.StatTxt.Height = 320
             Else
                 frmMain.StatTxt.Top = 416
-                frmMain.StatTxt.Height = 293
+                frmMain.StatTxt.Height = 576
             End If
         Case 1 ' Translados
             frmMain.lMapN.Visible = Ver
@@ -173,10 +173,10 @@ Public Sub VerFuncion(ByVal Numero As Byte, ByVal Ver As Boolean, Optional Norma
             frmMain.PreviewObj.Visible = Ver
             If Ver = True Then
                 frmMain.StatTxt.Top = 672
-                frmMain.StatTxt.Height = 37
+                frmMain.StatTxt.Height = 320
             Else
                 frmMain.StatTxt.Top = 416
-                frmMain.StatTxt.Height = 293
+                frmMain.StatTxt.Height = 576
             End If
 
         Case 6 ' Triggers

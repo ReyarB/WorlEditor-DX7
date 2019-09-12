@@ -818,11 +818,11 @@ End If
 '''''''''''''''''''Guardo la imagen'''''''''''''''''''''
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 If RenderToBMP Then
-    SavePicture frmRenderer.Picture1.Picture, App.Path & "\" & MapInfo.name & ".bmp"
+    SavePicture frmRenderer.Picture1.Picture, PATH_Save & "\Mapa" & NumMap_Save & ".bmp"
 Else
     Set C = New cDIBSection
     C.CreateFromPicture frmRenderer.Picture1.Picture
-    Call SaveJPG(C, App.Path & "\" & MapInfo.name & ".jpg")
+    Call SaveJPG(C, PATH_Save & "\Mapa" & NumMap_Save & ".jpg")
     Set C = Nothing
 End If
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -838,4 +838,242 @@ Set BMPSurface = Nothing
 Set C = Nothing
 MsgBox Err.Description & "-" & Err.Number
 End Sub
+
+Sub RenderToPictureMini(Optional Ratio As Integer = 31, Optional RenderToBMP As Boolean = True)
+'*************************************************
+'Author: Salvito
+'*************************************************
+'On Error GoTo Error:
+On Error Resume Next
+
+Dim y       As Integer              'Keeps track of where on map we are
+Dim X       As Integer
+Dim C As cDIBSection
+Dim ScreenX As Integer              'Keeps track of where to place tile on screen
+Dim ScreenY As Integer
+Dim r       As RECT
+Dim Sobre   As Integer
+Dim Moved   As Byte
+Dim iPPx    As Integer              'Usado en el Layer de Chars
+Dim iPPy    As Integer              'Usado en el Layer de Chars
+Dim Grh     As Grh                  'Temp Grh for show tile and blocked
+Dim bCapa    As Byte                 'cCapas ' 31/05/2006 - GS, control de Capas
+Dim rSourceRect         As RECT     'Usado en el Layer 1
+Dim iGrhIndex           As Integer  'Usado en el Layer 1
+Dim TempChar            As Char
+Dim TempRect As RECT
+Dim BMPSurface As DirectDrawSurface7
+Dim TSurfaceDesc As DDSURFACEDESC2
+
+frmRenderer.Show vbModeless, frmMain
+
+With TempRect
+    .Bottom = 3168
+    .Right = 31680
+    .Left = 0
+    .Top = 0
+End With
+    
+With TSurfaceDesc
+    .lFlags = DDSD_CAPS Or DDSD_HEIGHT Or DDSD_WIDTH
+    If ClientSetup.bUseVideo Then
+        .ddsCaps.lCaps = DDSCAPS_OFFSCREENPLAIN
+    Else
+        .ddsCaps.lCaps = DDSCAPS_OFFSCREENPLAIN Or DDSCAPS_SYSTEMMEMORY
+    End If
+    .lHeight = 3200
+    .lWidth = 3200
+End With
+
+' Create surface
+Set BMPSurface = DirectDraw.CreateSurface(TSurfaceDesc)
+
+BMPSurface.BltColorFill r, 0 'Solucion a algunos temas molestos :P
+
+If Val(frmMain.cCapas.Text) >= 1 And (frmMain.cCapas.Text) <= 2 Then
+    bCapa = Val(frmMain.cCapas.Text)
+Else
+    bCapa = 1
+End If
+ScreenY = 0
+For y = 1 To 100
+    frmRenderer.Caption = "Renderizando Primera Capa... " & y & "%"
+    DoEvents
+    ScreenX = 0
+    For X = 1 To 100
+        If InMapBounds(X, y) Then
+            If X > 100 Or y < 1 Then Exit For ' 30/05/2006
+            'Layer 1 **********************************
+            If SobreX = X And SobreY = y Then
+                ' Pone Grh !
+                Sobre = -1
+                If frmMain.cSeleccionarSuperficie.value = True Then
+                    Sobre = MapData(X, y).Graphic(bCapa).GrhIndex
+                    If frmConfigSup.MOSAICO.value = vbChecked Then
+                        Dim aux As Integer
+                        Dim dy As Integer
+                        Dim dX As Integer
+                        If frmConfigSup.DespMosaic.value = vbChecked Then
+                            dy = Val(frmConfigSup.DMLargo.Text)
+                            dX = Val(frmConfigSup.DMAncho.Text)
+                        Else
+                            dy = 0
+                            dX = 0
+                        End If
+                        If frmMain.mnuAutoCompletarSuperficies.Checked = False Then
+                            aux = Val(frmMain.cGrh.Text) + _
+                            (((y + dy) Mod frmConfigSup.mLargo.Text) * frmConfigSup.mAncho.Text) + ((X + dX) Mod frmConfigSup.mAncho.Text)
+                            If MapData(X, y).Graphic(bCapa).GrhIndex <> aux Then
+                                MapData(X, y).Graphic(bCapa).GrhIndex = aux
+                                InitGrh MapData(X, y).Graphic(bCapa), aux
+                            End If
+                        Else
+                            aux = Val(frmMain.cGrh.Text) + _
+                            (((y + dy) Mod frmConfigSup.mLargo.Text) * frmConfigSup.mAncho.Text) + ((X + dX) Mod frmConfigSup.mAncho.Text)
+                            If MapData(X, y).Graphic(bCapa).GrhIndex <> aux Then
+                                MapData(X, y).Graphic(bCapa).GrhIndex = aux
+                                InitGrh MapData(X, y).Graphic(bCapa), aux
+                            End If
+                        End If
+                    Else
+                        If MapData(X, y).Graphic(bCapa).GrhIndex <> Val(frmMain.cGrh.Text) Then
+                            MapData(X, y).Graphic(bCapa).GrhIndex = Val(frmMain.cGrh.Text)
+                            InitGrh MapData(X, y).Graphic(bCapa), Val(frmMain.cGrh.Text)
+                        End If
+                    End If
+                End If
+            Else
+                Sobre = -1
+            End If
+            With MapData(X, y).Graphic(1)
+                If (.GrhIndex <> 0) Then
+                    If (.Started = 1) Then
+                        If (.SpeedCounter > 0) Then
+                            .SpeedCounter = .SpeedCounter - 1
+                            If (.SpeedCounter = 0) Then
+                                .SpeedCounter = GrhData(.GrhIndex).Speed
+                                .FrameCounter = .FrameCounter + 1
+                                If (.FrameCounter > GrhData(.GrhIndex).NumFrames) Then _
+                                    .FrameCounter = 1
+                            End If
+                        End If
+                    End If
+                    'Figure out what frame to draw (always 1 if not animated)
+                    iGrhIndex = GrhData(.GrhIndex).Frames(.FrameCounter)
+                End If
+            End With
+            If iGrhIndex <> 0 Then
+                rSourceRect.Left = GrhData(iGrhIndex).sX
+                rSourceRect.Top = GrhData(iGrhIndex).sY
+                rSourceRect.Right = rSourceRect.Left + GrhData(iGrhIndex).pixelWidth
+                rSourceRect.Bottom = rSourceRect.Top + GrhData(iGrhIndex).pixelHeight
+                'El width fue hardcodeado para speed!
+                Call BMPSurface.BltFast( _
+                        ((32 * ScreenX) - 32) + 0, _
+                        ((32 * ScreenY) - 32) + 0, _
+                        SurfaceDB.Surface(GrhData(iGrhIndex).FileNum), _
+                        rSourceRect, _
+                        DDBLTFAST_WAIT)
+            End If
+            'Layer 2 **********************************
+            If MapData(X, y).Graphic(2).GrhIndex <> 0 And (frmMain.mnuVerCapa2.Checked = True) Then
+                Call DDrawTransGrhtoSurface( _
+                        BMPSurface, _
+                        MapData(X, y).Graphic(2), _
+                        ((32 * ScreenX) - 32) + 0, _
+                        ((32 * ScreenY) - 32) + 0, _
+                        1, _
+                        1)
+            End If
+            If Sobre >= 0 Then
+                If MapData(X, y).Graphic(bCapa).GrhIndex <> Sobre Then
+                MapData(X, y).Graphic(bCapa).GrhIndex = Sobre
+                InitGrh MapData(X, y).Graphic(bCapa), Sobre
+                End If
+            End If
+        End If
+        ScreenX = ScreenX + 1
+    Next X
+    ScreenY = ScreenY + 1
+    If y > 100 Then Exit For
+Next y
+ScreenY = 0
+For y = 1 To 100
+    ScreenX = 0
+    frmRenderer.Caption = "Renderizando Segunda Capa... " & y & "%"
+    DoEvents
+    For X = 1 To 100
+        If InMapBounds(X, y) Then
+            If X > 100 Or X < -3 Then Exit For ' 30/05/2006
+            iPPx = ((32 * ScreenX) - 32) + 0
+            iPPy = ((32 * ScreenY) - 32) + 0
+
+
+        End If
+        ScreenX = ScreenX + 1
+    Next X
+    ScreenY = ScreenY + 1
+Next y
+
+
+    frmRenderer.Caption = "Dibujando Render... 0%"
+    DoEvents
+frmRenderer.Picture1.AutoRedraw = True
+frmRenderer.Picture1.Width = 32 * 99 * Screen.TwipsPerPixelX
+frmRenderer.Picture1.Height = 32 * 99 * Screen.TwipsPerPixelY
+frmRenderer.Smallpic.Width = frmRenderer.Picture1.Width \ 10
+frmRenderer.Smallpic.Height = frmRenderer.Picture1.Height \ 10
+
+
+
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''''''''''Dibujo el Surface en una StdPicture''''''''''
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+BMPSurface.BltToDC frmRenderer.Picture1.hdc, TempRect, TempRect
+frmRenderer.Picture1.Picture = frmRenderer.Picture1.Image
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+    frmRenderer.Caption = "Dibujando Render... 99%"
+    DoEvents
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'Esto para achicar la imagen, ALTO bardo, jajajaja''''''
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+If Ratio > 1 Then
+    frmRenderer.Smallpic.Picture = frmRenderer.Picture1.Picture
+    frmRenderer.Smallpic.Width = frmRenderer.Picture1.Width \ Ratio
+    frmRenderer.Smallpic.Height = frmRenderer.Picture1.Height \ Ratio
+    frmRenderer.Picture1.Height = frmRenderer.Smallpic.Height
+    frmRenderer.Picture1.Width = frmRenderer.Smallpic.Width
+    frmRenderer.Picture1.Cls
+    frmRenderer.Picture1.PaintPicture frmRenderer.Smallpic.Picture, 0, 0, frmRenderer.Smallpic.Width, frmRenderer.Smallpic.Height
+    frmRenderer.Picture1.Picture = frmRenderer.Picture1.Image
+End If
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''''''''''''''''''Guardo la imagen'''''''''''''''''''''
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+If RenderToBMP Then
+    SavePicture frmRenderer.Picture1.Picture, PATH_Save & "\" & NumMap_Save & ".bmp"
+Else
+    Set C = New cDIBSection
+    C.CreateFromPicture frmRenderer.Picture1.Picture
+    Call SaveJPG(C, PATH_Save & "\" & NumMap_Save & ".jpg")
+    Set C = Nothing
+End If
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Unload frmRenderer
+Set BMPSurface = Nothing
+
+Exit Sub
+
+Error:
+Unload frmRenderer
+Set BMPSurface = Nothing
+Set C = Nothing
+MsgBox Err.Description & "-" & Err.Number
+End Sub
+
+
 
